@@ -3,7 +3,6 @@ lib/__pycache__/*
 **/*.pyc
 **/*.csv
 *.tif
-output/*
 **/._*
 data/**
 models/
