@@ -7,6 +7,8 @@ from lib import util
 
 PIXEL_SIZE = 30
 
+untrain = False
+
 class RawData(object):
 
     def __init__(self, burns):
@@ -21,11 +23,12 @@ class RawData(object):
             print('1')
         if burnNames == 'untrain':
             print('2')
+            untrain = True
             burnNames = listdir_nohidden('data/_untrained/')
             print('2')
         if dates == 'all':
             print('3')
-            burns = {n:Burn.load(n, 'all') for n in burnNames}
+            burns = {n:Burn.load(n, untrain, 'all') for n in burnNames}
             print('3')
         else:
             # assumes dates is a dict, with keys being burnNames and vals being dates
@@ -52,9 +55,10 @@ class RawData(object):
 
 class Burn(object):
 
-    def __init__(self, name, days, layers=None):
+    def __init__(self, name, days, untrain=False, layers=None):
         self.name = name
         self.days = days
+        self._untrain = untrain
         self.layers = layers if layers is not None else self.loadLayers()
 
         # what is the height and width of a layer of data
@@ -62,6 +66,8 @@ class Burn(object):
 
     def loadLayers(self):
         folder = 'data/{}/'.format(self.name)
+        if self._untrain:
+            folder = 'data/_untrained/{}/'.format(self.name)
         dem = util.openImg(folder+'dem.npy') # tif
         slope = util.openImg(folder+'slope.npy')
         band_2 = util.openImg(folder+'band_2.npy')
@@ -95,23 +101,28 @@ class Burn(object):
         # print(dates)
         if dates == 'all':
             dates = Day.allGoodDays(burnName, untrain)
-        days = {date:Day(burnName, date) for date in dates}
-        return Burn(burnName, days)
+
+        days = {date:Day(burnName, date, untrain) for date in dates}
+        return Burn(burnName, days, untrain)
 
     def __repr__(self):
         return "Burn({}, {})".format(self.name, [d.date for d in self.days.values()])
 
 class Day(object):
 
-    def __init__(self, burnName, date, weather=None, startingPerim=None, endingPerim=None):
+    def __init__(self, burnName, date, untrain=False, weather=None, startingPerim=None, endingPerim=None):
         self.burnName = burnName
         self.date = date
+        self.untrain = untrain
         self.weather = weather             if weather       is not None else self.loadWeather()
         self.startingPerim = startingPerim if startingPerim is not None else self.loadStartingPerim()
         self.endingPerim = endingPerim     if endingPerim   is not None else self.loadEndingPerim()
 
     def loadWeather(self):
         fname = 'data/{}/weather/{}.csv'.format(self.burnName, self.date)
+        if self.untrain:
+            fname = 'data/_untrained/{}/weather/{}.csv'.format(self.burnName, self.date)
+
         # the first row is the headers, and only cols 4-11 are actual data
         data = np.loadtxt(fname, skiprows=1, usecols=range(5,12), delimiter=',').T
         # now data is 2D array
@@ -121,6 +132,9 @@ class Day(object):
         # fname = 'data/{}/perims/{}.tif'.format(self.burnName, self.date)
         # perim = cv2.imread(fname, cv2.IMREAD_UNCHANGED)
         fname = 'data/{}/perims/{}.npy'.format(self.burnName, self.date)
+        if self.untrain:
+            fname = 'data/_untrained/{}/perims/{}.npy'.format(self.burnName, self.date)
+
         perim = np.load(fname)
         if perim is None:
             raise RuntimeError('Could not find a perimeter for the fire {} for the day {}'.format(self.burnName, self.date))
@@ -134,6 +148,8 @@ class Day(object):
         # perim = cv2.imread(fname, cv2.IMREAD_UNCHANGED)
         try:
             fname = 'data/{}/perims/{}.npy'.format(self.burnName, guess1)
+            if self.untrain:
+                fname = 'data/_untrained/{}/perims/{}.npy'.format(self.burnName, guess1)
             perim = np.load(fname)
         except:
         # if perim is None:
@@ -141,9 +157,13 @@ class Day(object):
             # fname = 'data/{}/perims/{}.tif'.format(self.burnName, guess2)
             # perim = cv2.imread(fname, cv2.IMREAD_UNCHANGED)
             fname = 'data/{}/perims/{}.npy'.format(self.burnName, guess2)
+            if self.untrain:
+                fname = 'data/_untrained/{}/perims/{}.npy'.format(self.burnName, guess2)
             perim = np.load(fname)
             if perim is None:
                 raise RuntimeError('Could not open a perimeter for the fire {} for the day {} or {}'.format(self.burnName, guess1, guess2))
+
+
         perim[perim!=1] = 0
         return perim
 

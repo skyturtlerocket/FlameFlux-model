@@ -192,5 +192,6 @@ elif len(sys.argv) == 1:
     print('Training a new model...')
     openAndTrain()
 else:
+    print(">>> Making a new dataset")
     test = predictFires()
     dataset.Dataset.save(test, fname='beaverCreek')
