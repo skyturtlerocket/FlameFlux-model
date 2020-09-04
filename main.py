@@ -9,6 +9,7 @@ from lib import metrics
 from lib import viz
 from lib import preprocess
 from lib import util
+from lib import model
 
 SAMPLE_SIZE = 100000
 
@@ -105,7 +106,6 @@ def reloadPredictions():
     return test, predictions
 
 def getModel(weightsFile=None):
-    from lib import model
     print('in getModel')
     numWeatherInputs = 8
     usedLayers = ['dem','ndvi', 'aspect', 'slope', 'band_2', 'band_3', 'band_4', 'band_5'] #, 'slope'
