@@ -89,12 +89,12 @@ class Burn(object):
         return layers
 
     @staticmethod
-    def load(burnName, dates='all'):
+    def load(burnName, untrain=False, dates='all'):
         # print("Loading: ", burnName)
         # print("in load")
         # print(dates)
         if dates == 'all':
-            dates = Day.allGoodDays(burnName)
+            dates = Day.allGoodDays(burnName, untrain)
         days = {date:Day(burnName, date) for date in dates}
         return Burn(burnName, days)
 
@@ -163,9 +163,12 @@ class Day(object):
         return guess1, guess2
 
     @staticmethod
-    def allGoodDays(burnName):
+    def allGoodDays(burnName, untrain=False):
         '''Given a fire, return a list of all dates that we can train on'''
-        directory = 'data/{}/'.format(burnName)
+        if untrain:
+            directory = 'data/_untrained/{}/'.format(burnName)
+        else:
+            directory = 'data/{}/'.format(burnName)
 
         weatherFiles = listdir_nohidden(directory+'weather/')
         weatherDates = [fname[:-len('.csv')] for fname in weatherFiles]
