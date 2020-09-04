@@ -822,7 +822,7 @@ def showPredictions(predictionsRenders):
             withTitle = render.copy()
             cv2.putText(withTitle,date, pos, cv2.FONT_HERSHEY_SIMPLEX, size, color, thickness=thickness)
             im = plt.imshow(withTitle)
-            fname = "output/figures/"+str(withTitle)+str(date)+".png"
+            fname = "output/figures/"+str(date)+".png"
             plt.savefig(fname,bbox_inches='tight', dpi=300)
             plt.close()
         #     ims.append([im])
