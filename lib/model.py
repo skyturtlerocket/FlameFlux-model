@@ -164,7 +164,7 @@ def fireCastModel(preProcessor, weightsFileName=None):
     return model
 
 
-def fireCastFit(mod, preProcessor, training, validate, epochs=100):
+def fireCastFit(mod, preProcessor, training, validate, epochs=25):
     (tinputs, toutputs), ptList = preProcessor.process(training)
     (vinputs, voutputs), ptList = preProcessor.process(validate)
     # print('training on ', training)
