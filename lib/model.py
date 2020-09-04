@@ -170,8 +170,8 @@ def fireCastFit(mod, preProcessor, training, validate, epochs=100):
     # print('training on ', training)
     # history = super().fit(tinputs, toutputs, batch_size = 32, epochs=epochs, validation_data=(vinputs, voutputs))
 
-    es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
-    mod.fit(tinputs, toutputs, batch_size = 32, epochs=epochs, validation_data=(vinputs, voutputs), callbacks=[es])
+    # es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
+    mod.fit(tinputs, toutputs, batch_size = 32, epochs=epochs, validation_data=(vinputs, voutputs)) #, callbacks=[es]
 
     # self.saveWeights()
     time_string = time.strftime("%Y%m%d-%H%M%S")
