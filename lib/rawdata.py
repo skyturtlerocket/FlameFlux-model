@@ -17,6 +17,7 @@ class RawData(object):
     @staticmethod
     def load(burnNames='all', dates='all'):
         print("in rawdata load")
+        untrain = False
         if burnNames == 'all':
             print('1')
             burnNames = listdir_nohidden('data/')
