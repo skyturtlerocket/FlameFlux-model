@@ -846,7 +846,10 @@ def showPredictions(predictionsRenders):
             return onKey
 
         fig.canvas.mpl_connect('key_press_event', createMyOnKey(anim))
-        plt.show()
+        # plt.show()
+        fname = "output/figures/"+str(burnName)+str(frameList)+".png"
+        plt.savefig(fname,bbox_inches='tight', dpi=300)
+        plt.close()
 
 
 def show(*imgs, imm=True):
@@ -854,8 +857,11 @@ def show(*imgs, imm=True):
         for i, img in enumerate(imgs):
             plt.figure(i, figsize=(8, 6))
             plt.imshow(img)
-        if imm:
-            plt.show()
+            fname = "output/figures/"+str(img)+str(i)+".png"
+            plt.savefig(fname,bbox_inches='tight', dpi=300)
+            plt.close()
+        # if imm:
+        #     plt.show()
     except:
         print("Not able to show because plt not imported")
 
