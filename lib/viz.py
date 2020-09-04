@@ -822,34 +822,37 @@ def showPredictions(predictionsRenders):
             withTitle = render.copy()
             cv2.putText(withTitle,date, pos, cv2.FONT_HERSHEY_SIMPLEX, size, color, thickness=thickness)
             im = plt.imshow(withTitle)
-            ims.append([im])
-        anim = animation.ArtistAnimation(fig, ims, interval=300, blit=True,
-                                repeat_delay=0)
+            fname = "output/figures/"+str(withTitle)+str(date)+".png"
+            plt.savefig(fname,bbox_inches='tight', dpi=300)
+            plt.close()
+        #     ims.append([im])
+        # anim = animation.ArtistAnimation(fig, ims, interval=300, blit=True,
+        #                         repeat_delay=0)
 
-        def createMyOnKey(anim):
-            def onKey(event):
-                if event.key == 'right':
-                    anim._step()
-                elif event.key == 'left':
-                    saved = anim._draw_next_frame
-                    def dummy(a,b):
-                        pass
-                    anim._draw_next_frame = dummy
-                    for i in range(len(anim._framedata)-2):
-                        anim._step()
-                    anim._draw_next_frame = saved
-                    anim._step()
-                elif event.key =='down':
-                    anim.event_source.stop()
-                elif event.key =='up':
-                    anim.event_source.start()
-            return onKey
+        # def createMyOnKey(anim):
+        #     def onKey(event):
+        #         if event.key == 'right':
+        #             anim._step()
+        #         elif event.key == 'left':
+        #             saved = anim._draw_next_frame
+        #             def dummy(a,b):
+        #                 pass
+        #             anim._draw_next_frame = dummy
+        #             for i in range(len(anim._framedata)-2):
+        #                 anim._step()
+        #             anim._draw_next_frame = saved
+        #             anim._step()
+        #         elif event.key =='down':
+        #             anim.event_source.stop()
+        #         elif event.key =='up':
+        #             anim.event_source.start()
+        #     return onKey
 
-        fig.canvas.mpl_connect('key_press_event', createMyOnKey(anim))
+        # fig.canvas.mpl_connect('key_press_event', createMyOnKey(anim))
         # plt.show()
-        fname = "output/figures/"+str(burnName)+str(frameList)+".png"
-        plt.savefig(fname,bbox_inches='tight', dpi=300)
-        plt.close()
+        # fname = "output/figures/"+str(burnName)+str(frameList)+".png"
+        # plt.savefig(fname,bbox_inches='tight', dpi=300)
+        # plt.close()
 
 
 def show(*imgs, imm=True):
