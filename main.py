@@ -19,7 +19,7 @@ def predictFires():
     new_data = rawdata.RawData.load(burnNames='untrain', dates='all')
     newDataSet = dataset.Dataset(new_data, dataset.Dataset.vulnerablePixels)
     pointLst = newDataSet.toList(newDataSet.points)
-    pointLst = random.sample(pointLst, 20) #SAMPLE_SIZE
+    pointLst = random.sample(pointLst, SAMPLE_SIZE) #SAMPLE_SIZE
     test = dataset.Dataset(new_data, pointLst)
     return test
 
@@ -193,4 +193,4 @@ elif len(sys.argv) == 1:
     openAndTrain()
 else:
     test = predictFires()
-    dataset.Dataset.save(test)
+    dataset.Dataset.save(test, fname='beaverCreek')
