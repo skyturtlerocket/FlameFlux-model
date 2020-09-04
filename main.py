@@ -134,37 +134,15 @@ def example():
         datasetfname = askopenfilename(initialdir = "output/datasets",title="choose a dataset")
         root.destroy()
 
-
+    rand = False
 
     test = dataset.openDataset(datasetfname)
-    mod,_ = getModel(modfname)
-    predictions, resu = mod.predict(test, rand) #Could have messed this up by returning two things!!!!!!!!!
-    # count = 0
-    fireDate = []
-    samples = []
-    preResu = []
+    mod,pp = getModel(modfname)
+
+    predictions, _ = model.fireCastPredict(mod, pp, test, rand)
+    calculatePerformance(test, predictions)
 
 
-
-    print("SIZE OF PREDICTIONS: " , len(predictions))
-    for pre in predictions:
-        fireDate.append(pre[1])
-        samples.append(pre[2])
-        preResu.append(predictions.get(pre))
-        # print(predictions.get(pre))
-        # exit()
-        # count = count + 1
-
-    if rand:
-        print("THIS IS A RANDOM TEST!!!")
-
-    # for pt, pred in predictions.items():
-
-    # viz.compare_farsite(test, samples, preResu, len(predictions), fireDate)
-    # viz.getNumbersNonConsecutive(test, samples, preResu, len(predictions), fireDate)
-    # viz.getNumbers(test, samples, preResu, len(predictions), fireDate)
-    res = viz.visualizePredictions(test, predictions, preResu)
-    viz.showPredictions(res)
 
 #uncomment openAndTrain() to train a new model
 #if you create a new dataset, must change name to have "_" instead of "/" for it to work with example()
