@@ -137,7 +137,7 @@ def example():
 
 
     test = dataset.openDataset(datasetfname)
-    mod = getModel(modfname)
+    mod,_ = getModel(modfname)
     predictions, resu = mod.predict(test, rand) #Could have messed this up by returning two things!!!!!!!!!
     # count = 0
     fireDate = []
