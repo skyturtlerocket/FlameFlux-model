@@ -10,8 +10,8 @@ import tensorflow as tf
 # from keras.layers import Conv2D, MaxPooling2D, AveragePooling2D
 # from keras.optimizers import SGD
 # from keras.losses import mse, binary_crossentropy
-from keras.models import load_model
-from keras.callbacks import EarlyStopping
+# from keras.models import load_model
+# from keras.callbacks import EarlyStopping
 # from keras.layers import Dense, Activation, Dropout, Flatten, Concatenate, Input
 # from keras.optimizers import SGD, RMSprop
 # from keras.layers import Conv2D, MaxPooling2D, AveragePooling2D
@@ -126,7 +126,7 @@ except:
 def fireCastModel(preProcessor, weightsFileName=None):
     if weightsFileName:
         fname = 'models/' + weightsFileName + ".h5"
-        model = load_model(fname)
+        model = tf.keras.models.load_model(fname)
         return model
 
 
