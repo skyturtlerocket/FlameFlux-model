@@ -30,7 +30,7 @@ def renderPredictions(dataset, predictions, preResu):
     for (burnName, date), locsAndPreds in day2pred.items():
         locs, preds = zip(*locsAndPreds)
         xs,ys = zip(*locs)
-        preds = [pred+1 for pred in preds]
+        # Keep predictions as original probability values (0-1) for proper color mapping
         burn = dataset.data.burns[burnName]
         canvas = np.zeros(burn.layerSize, dtype=np.float32)
         canvas[(xs,ys)] = np.array(preds, dtype=np.float32)
@@ -776,8 +776,8 @@ def createCanvases(dataset):
         #         cou = cou + 1
         #     coun = coun + 1
 
-        im2, startContour, hierarchy = cv2.findContours(day.startingPerim.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        im2, endContour, heirarchy = cv2.findContours(day.endingPerim.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        startContour, hierarchy = cv2.findContours(day.startingPerim.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        endContour, heirarchy = cv2.findContours(day.endingPerim.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         #the code below puts the perimeters on the visual
         cv2.drawContours(canvas, endContour, -1, (0,0,1), 1)
@@ -791,8 +791,12 @@ def overlay(predictionRenders, canvases):
     for burnName, date in sorted(canvases):
         canvas = canvases[(burnName, date)].copy()
         render = predictionRenders[(burnName, date)]
-        yellowToRed = np.dstack((np.ones_like(render), 1-(render-1), np.zeros_like(render)))
-        canvas[render>1] = yellowToRed[render>1]
+        # Create color mapping: yellow (probability 0) to red (probability 1)
+        # RGB: yellow = (1,1,0), red = (1,0,0)
+        # Green channel goes from 1 to 0 as probability increases
+        yellowToRed = np.dstack((np.ones_like(render), 1-render, np.zeros_like(render)))
+        # Only color pixels that have predictions (probability > 0)
+        canvas[render>0] = yellowToRed[render>0]
         result[(burnName, date)] = canvas
     return result
 

@@ -15,26 +15,26 @@ class RawData(object):
         self.burns = burns
 
     @staticmethod
-    def load(burnNames='all', dates='all'):
+    def load(burnNames='all', dates='all', inference=False):
         print("in rawdata load")
         untrain = False
         if burnNames == 'all':
             print('1')
-            burnNames = listdir_nohidden('data/')
+            burnNames = listdir_nohidden('training_data/')
             print('1')
         if burnNames == 'untrain':
             print('2')
             untrain = True
-            burnNames = listdir_nohidden('data/_untrained/')
+            burnNames = listdir_nohidden('training_data/_untrained/')
             print('2')
         if dates == 'all':
             print('3')
-            burns = {n:Burn.load(n, untrain, 'all') for n in burnNames}
+            burns = {n:Burn.load(n, untrain, 'all', inference=inference) for n in burnNames}
             print('3')
         else:
             # assumes dates is a dict, with keys being burnNames and vals being dates
             print('4')
-            burns = {n:Burn.load(n, dates[n]) for n in burnNames}
+            burns = {n:Burn.load(n, untrain, dates[n], inference=inference) for n in burnNames}
             print('4')
         return RawData(burns)
 
@@ -66,9 +66,9 @@ class Burn(object):
         self.layerSize = list(self.layers.values())[0].shape[:2]
 
     def loadLayers(self):
-        folder = 'data/{}/'.format(self.name)
+        folder = 'training_data/{}/'.format(self.name)
         if self._untrain:
-            folder = 'data/_untrained/{}/'.format(self.name)
+            folder = 'training_data/_untrained/{}/'.format(self.name)
         dem = util.openImg(folder+'dem.npy') # tif
         slope = util.openImg(folder+'slope.npy')
         band_2 = util.openImg(folder+'band_2.npy')
@@ -96,14 +96,14 @@ class Burn(object):
         return layers
 
     @staticmethod
-    def load(burnName, untrain=False, dates='all'):
+    def load(burnName, untrain=False, dates='all', inference=False):
         # print("Loading: ", burnName)
         # print("in load")
         # print(dates)
         if dates == 'all':
-            dates = Day.allGoodDays(burnName, untrain)
+            dates = Day.allGoodDays(burnName, untrain, inference=inference)
 
-        days = {date:Day(burnName, date, untrain) for date in dates}
+        days = {date:Day(burnName, date, untrain, inference=inference) for date in dates}
         return Burn(burnName, days, untrain)
 
     def __repr__(self):
@@ -111,18 +111,21 @@ class Burn(object):
 
 class Day(object):
 
-    def __init__(self, burnName, date, untrain=False, weather=None, startingPerim=None, endingPerim=None):
+    def __init__(self, burnName, date, untrain=False, weather=None, startingPerim=None, endingPerim=None, inference=False):
         self.burnName = burnName
         self.date = date
         self.untrain = untrain
         self.weather = weather             if weather       is not None else self.loadWeather()
         self.startingPerim = startingPerim if startingPerim is not None else self.loadStartingPerim()
-        self.endingPerim = endingPerim     if endingPerim   is not None else self.loadEndingPerim()
+        if not inference:
+            self.endingPerim = endingPerim     if endingPerim   is not None else self.loadEndingPerim()
+        else:
+            self.endingPerim = None
 
     def loadWeather(self):
-        fname = 'data/{}/weather/{}.csv'.format(self.burnName, self.date)
+        fname = 'training_data/{}/weather/{}.csv'.format(self.burnName, self.date)
         if self.untrain:
-            fname = 'data/_untrained/{}/weather/{}.csv'.format(self.burnName, self.date)
+            fname = 'training_data/_untrained/{}/weather/{}.csv'.format(self.burnName, self.date)
 
         # the first row is the headers, and only cols 4-11 are actual data
         data = np.loadtxt(fname, skiprows=1, usecols=range(5,12), delimiter=',').T
@@ -130,11 +133,11 @@ class Day(object):
         return data
 
     def loadStartingPerim(self):
-        # fname = 'data/{}/perims/{}.tif'.format(self.burnName, self.date)
+        # fname = 'training_data/{}/perims/{}.tif'.format(self.burnName, self.date)
         # perim = cv2.imread(fname, cv2.IMREAD_UNCHANGED)
-        fname = 'data/{}/perims/{}.npy'.format(self.burnName, self.date)
+        fname = 'training_data/{}/perims/{}.npy'.format(self.burnName, self.date)
         if self.untrain:
-            fname = 'data/_untrained/{}/perims/{}.npy'.format(self.burnName, self.date)
+            fname = 'training_data/_untrained/{}/perims/{}.npy'.format(self.burnName, self.date)
 
         perim = np.load(fname)
         if perim is None:
@@ -148,18 +151,18 @@ class Day(object):
         # fname = 'data/{}/perims/{}.tif'.format(self.burnName, guess1)
         # perim = cv2.imread(fname, cv2.IMREAD_UNCHANGED)
         try:
-            fname = 'data/{}/perims/{}.npy'.format(self.burnName, guess1)
+            fname = 'training_data/{}/perims/{}.npy'.format(self.burnName, guess1)
             if self.untrain:
-                fname = 'data/_untrained/{}/perims/{}.npy'.format(self.burnName, guess1)
+                fname = 'training_data/_untrained/{}/perims/{}.npy'.format(self.burnName, guess1)
             perim = np.load(fname)
         except:
         # if perim is None:
             # overflowed the month, that file didnt exist
-            # fname = 'data/{}/perims/{}.tif'.format(self.burnName, guess2)
+            # fname = 'training_data/{}/perims/{}.tif'.format(self.burnName, guess2)
             # perim = cv2.imread(fname, cv2.IMREAD_UNCHANGED)
-            fname = 'data/{}/perims/{}.npy'.format(self.burnName, guess2)
+            fname = 'training_data/{}/perims/{}.npy'.format(self.burnName, guess2)
             if self.untrain:
-                fname = 'data/_untrained/{}/perims/{}.npy'.format(self.burnName, guess2)
+                fname = 'training_data/_untrained/{}/perims/{}.npy'.format(self.burnName, guess2)
             perim = np.load(fname)
             if perim is None:
                 raise RuntimeError('Could not open a perimeter for the fire {} for the day {} or {}'.format(self.burnName, guess1, guess2))
@@ -184,35 +187,48 @@ class Day(object):
         return guess1, guess2
 
     @staticmethod
-    def allGoodDays(burnName, untrain=False):
-        '''Given a fire, return a list of all dates that we can train on'''
+    def allGoodDays(burnName, untrain=False, inference=False):
+        '''Given a fire, return a list of all dates that we can train on (or predict on, if inference=True)'''
         if untrain:
-            directory = 'data/_untrained/{}/'.format(burnName)
+            directory = 'training_data/_untrained/{}/'.format(burnName)
         else:
-            directory = 'data/{}/'.format(burnName)
+            directory = 'training_data/{}/'.format(burnName)
 
         weatherFiles = listdir_nohidden(directory+'weather/')
         weatherDates = [fname[:-len('.csv')] for fname in weatherFiles]
 
         perimFiles = listdir_nohidden(directory+'perims/')
-        # perimDates = [fname[:-len('.tif')] for fname in perimFiles if isValidImg(directory+'perims/'+fname)]
         perimDates = [fname[:-len('.npy')] for fname in perimFiles if isValidImg(directory+'perims/'+fname)]
 
-        # we can only use days which have perimeter data on the following day
-        daysWithFollowingPerims = []
-        for d in perimDates:
-            nextDay1, nextDay2 = Day.nextDay(d)
-            if nextDay1 in perimDates or nextDay2 in perimDates:
-                daysWithFollowingPerims.append(d)
+        if inference:
+            # In inference mode, allow any day with both a perimeter and weather for the current day
+            daysWithWeatherAndPerims = [d for d in perimDates if d in weatherDates]
+            daysWithWeatherAndPerims.sort()
+            return daysWithWeatherAndPerims
+        else:
+            # we can only use days which have perimeter data on the following day
+            daysWithFollowingPerims = []
+            for d in perimDates:
+                nextDay1, nextDay2 = Day.nextDay(d)
+                if nextDay1 in perimDates or nextDay2 in perimDates:
+                    daysWithFollowingPerims.append(d)
 
-        # now we have to verify that we have weather for these days as well
-        daysWithWeatherAndPerims = [d for d in daysWithFollowingPerims if d in weatherDates]
-        daysWithWeatherAndPerims.sort()
-        return daysWithWeatherAndPerims
+            # now we have to verify that we have weather for these days as well
+            daysWithWeatherAndPerims = [d for d in daysWithFollowingPerims if d in weatherDates]
+            daysWithWeatherAndPerims.sort()
+            return daysWithWeatherAndPerims
 
 def isValidImg(imgName):
-    img = cv2.imread(imgName, cv2.IMREAD_UNCHANGED)
-    return img is not None
+    if imgName.endswith('.npy'):
+        try:
+            arr = np.load(imgName)
+            return arr is not None
+        except Exception as e:
+            print(f"Failed to load npy file {imgName}: {e}")
+            return False
+    else:
+        img = cv2.imread(imgName, cv2.IMREAD_UNCHANGED)
+        return img is not None
 
 def listdir_nohidden(path):
     '''List all the files in a path that are not hidden (begin with a .)'''

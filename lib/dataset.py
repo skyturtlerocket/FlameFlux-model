@@ -8,11 +8,11 @@ import numpy as np
 import cv2
 from lib import rawdata
 from lib import viz
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 class Dataset(object):
     '''A set of Point objects'''
-    VULNERABLE_RADIUS = 500
+    VULNERABLE_RADIUS = 100
 
     def __init__(self, data, points='all'):
         print('creating new dataset')

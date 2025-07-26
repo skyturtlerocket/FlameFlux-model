@@ -92,9 +92,40 @@ def normalize(arr, axis=None):
     if axis=1, then each row is normalized independently'''
 
     arr = arr.astype(np.float32)
-    res = arr - np.nanmin(arr, axis=axis)
+    
+    # Check for empty arrays or all-NaN arrays
+    if arr.size == 0:
+        print("Warning: Empty array passed to normalize(), returning zeros")
+        return np.zeros_like(arr)
+    
+    # Check if all values are NaN
+    if np.all(np.isnan(arr)):
+        print("Warning: All-NaN array passed to normalize(), returning zeros")
+        return np.zeros_like(arr)
+    
+    # Check if there are any valid (non-NaN) values
+    valid_mask = ~np.isnan(arr)
+    if not np.any(valid_mask):
+        print("Warning: No valid values in array passed to normalize(), returning zeros")
+        return np.zeros_like(arr)
+    
+    # Only normalize using valid values
+    valid_arr = arr[valid_mask]
+    if valid_arr.size == 0:
+        print("Warning: No valid values after masking, returning zeros")
+        return np.zeros_like(arr)
+    
+    min_val = np.nanmin(valid_arr)
+    max_val = np.nanmax(valid_arr)
+    
+    # Check if min and max are the same (would cause division by zero)
+    if min_val == max_val:
+        print("Warning: Min and max values are identical, returning zeros")
+        return np.zeros_like(arr)
+    
+    res = arr - min_val
     # where dividing by zero, just use zero
-    res = np.divide(res, np.nanmax(res, axis=axis), out=np.zeros_like(res), where=res!=0)
+    res = np.divide(res, max_val - min_val, out=np.zeros_like(res), where=res!=0)
     return res
 
 def partition(things, ratios=None):

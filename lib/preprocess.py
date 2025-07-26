@@ -19,14 +19,15 @@ class PreProcessor(object):
         self.whichLayers = whichLayers
         self.AOIRadius = AOIRadius
 
-    def process(self, dataset):
-        '''Take a dataset and return the extracted inputs and outputs'''
+    def process(self, dataset, inference=False):
+        '''Take a dataset and return the extracted inputs and outputs, or just inputs if inference'''
         # create dictionaries mapping from Point to actual data from that Point
         metrics = calculateWeatherMetrics(dataset)
         oneMetric = list(metrics.values())[0]
         assert len(oneMetric) == self.numWeatherInputs, "Your weather metric function must return the expected number of metrics"
         aois = getSpatialData(dataset, self.whichLayers, self.AOIRadius)
-        outs = getOutputs(dataset)
+        if not inference:
+            outs = getOutputs(dataset)
 
         # convert the dictionaries into lists, then arrays
         w, i, o = [], [], []
@@ -35,19 +36,15 @@ class PreProcessor(object):
             burnName, date, location = pt
             w.append(metrics[burnName, date])
             i.append(aois[burnName, date, location])
-            o.append(outs[burnName, date, location])
+            if not inference:
+                o.append(outs[burnName, date, location])
         weatherInputs = np.array(w)
         imgInputs = np.array(i)
-        outputs = np.array(o)
-
-        # print('weather: ', np.count_nonzero(weatherInputs == np.nan))
-        # print(np.mean(weatherInputs))
-        # print('image: ', np.count_nonzero(imgInputs == np.nan))
-        # print(np.mean(imgInputs))
-        # print('output: ', np.count_nonzero(outputs == np.nan))
-        # print(np.mean(outputs))
-        # print("out: ", outputs)
-        return ([weatherInputs, imgInputs], outputs), ptList
+        if not inference:
+            outputs = np.array(o)
+            return ([weatherInputs, imgInputs], outputs), ptList
+        else:
+            return [weatherInputs, imgInputs], ptList
 
 def calculateWeatherMetrics(dataset):
     '''Return a dictionary mapping from (burnName, date) id's to a dictionary of named weather metrics.'''
@@ -171,7 +168,7 @@ def stackAndPad(layerDict, whichLayers, dataset, AOIRadius):
         stacked = np.dstack(layers)
         r = AOIRadius
         # pad with zeros around border of image
-        padded = np.lib.pad(stacked, ((r,r),(r,r),(0,0)), 'constant')
+        padded = np.pad(stacked, ((r,r),(r,r),(0,0)), 'constant')
         result[(burnName, date)] = padded
     return result
 
