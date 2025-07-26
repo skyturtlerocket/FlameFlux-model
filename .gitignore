@@ -1,0 +1,48 @@
+# Virtual Environment
+myvenv/
+venv/
+env/
+
+# Data directories
+training_data/
+data/
+output/
+
+# Large model files
+*.h5
+*.hdf5
+*.hdf
+
+# Data files
+*.npy
+*.npz
+*.tif
+*.tiff
+
+# Generated outputs
+output/
+*.log
+*.out
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Temporary files
+*.tmp
+*.temp 
