@@ -4,14 +4,14 @@ Use python satellite imagery, historical weather data, and historical fire perim
 
 # Requirements
 Install required libraries using the following command in the root directory:
-'''bash
+```bash
 pip install -r requirements.txt
-'''
+```
 You may have to create a virtual environment. Use the following commands:
-'''bash
+```bash
 python -m venv myvenv
 source myvenv/bin/activate
-'''
+```
 The first command creates a virtual environment called myvenv and the second command can be used 
 to activate it.
 
