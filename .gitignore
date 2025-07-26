@@ -3,26 +3,11 @@ myvenv/
 venv/
 env/
 
-# Data directories
-training_data/
-data/
-output/
-
-# Large model files
-*.h5
-*.hdf5
-*.hdf
-
-# Data files
-*.npy
-*.npz
-*.tif
-*.tiff
-
-# Generated outputs
-output/
-*.log
-*.out
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # IDE files
 .vscode/
@@ -33,12 +18,6 @@ output/
 # OS files
 .DS_Store
 Thumbs.db
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
 
 # Jupyter notebooks
 .ipynb_checkpoints/
